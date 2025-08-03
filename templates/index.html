@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>🔮 Bigram Predictor</title>
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+            background-color: #f9f9f9;
+            padding: 40px;
+        }
+        input, button {
+            padding: 10px;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        .result {
+            margin-top: 30px;
+        }
+        .error {
+            color: red;
+            margin-top: 20px;
+        }
+        ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔮 Bigram Predictor</h1>
+    <form method="post">
+        <input type="text" name="word" placeholder="Enter a word..." required>
+        <button type="submit">Predict</button>
+    </form>
+
+    {% if error %}
+    <div class="error">{{ error }}</div>
+    {% endif %}
+
+    {% if predictions %}
+    <div class="result">
+        <h3>📊 Top Predictions with Probabilities:</h3>
+        <ul>
+        {% for word, prob in predictions %}
+            <li><strong>{{ word }}</strong> — Probability: {{ prob }}</li>
+        {% endfor %}
+        </ul>
+
+        <h3>✨ Generated Sentence:</h3>
+        <p>{{ sentence }}</p>
+    </div>
+    {% endif %}
+</body>
+</html>
