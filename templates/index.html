@@ -1,55 +1,111 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>🔮 Bigram Predictor</title>
-    <style>
-        body {
-            font-family: Arial;
-            text-align: center;
-            background-color: #f9f9f9;
-            padding: 40px;
-        }
-        input, button {
-            padding: 10px;
-            font-size: 16px;
-            margin-top: 10px;
-        }
-        .result {
-            margin-top: 30px;
-        }
-        .error {
-            color: red;
-            margin-top: 20px;
-        }
-        ul {
-            list-style-type: none;
-            padding-left: 0;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Movie Review Sentence Predictor</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f0f5;
+      padding: 2rem;
+      text-align: center;
+    }
+    #inputBox {
+      width: 60%;
+      padding: 12px;
+      font-size: 18px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+    }
+    .suggestion-box, .prediction-box {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+      animation: fadeIn 0.3s ease-in;
+    }
+    .btn {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: 0.3s;
+    }
+    .btn:hover {
+      background-color: #45a049;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
 <body>
-    <h1>🔮 Bigram Predictor</h1>
-    <form method="post">
-        <input type="text" name="word" placeholder="Enter a word..." required>
-        <button type="submit">Predict</button>
-    </form>
+  <h2>🎬 Movie Review Sentence Suggestion</h2>
+  <input id="inputBox" type="text" placeholder="Start typing a sentence..." oninput="onInputChange()">
+  
+  <div class="suggestion-box" id="suggestions"></div>
+  <div class="prediction-box" id="predictions"></div>
 
-    {% if error %}
-    <div class="error">{{ error }}</div>
-    {% endif %}
+  <script>
+    async function onInputChange() {
+      const text = document.getElementById('inputBox').value;
+      const lastWord = text.split(' ').slice(-1)[0];
 
-    {% if predictions %}
-    <div class="result">
-        <h3>📊 Top Predictions with Probabilities:</h3>
-        <ul>
-        {% for word, prob in predictions %}
-            <li><strong>{{ word }}</strong> — Probability: {{ prob }}</li>
-        {% endfor %}
-        </ul>
+      // Suggestions based on prefix
+      if (lastWord) {
+        const suggestRes = await fetch(`/suggest?prefix=${lastWord}`);
+        const suggestions = await suggestRes.json();
+        displaySuggestions(suggestions);
+      }
 
-        <h3>✨ Generated Sentence:</h3>
-        <p>{{ sentence }}</p>
-    </div>
-    {% endif %}
+      // Predictions based on last word
+      if (text.trim()) {
+        const predRes = await fetch(`/predict?text=${text}`);
+        const predictions = await predRes.json();
+        displayPredictions(predictions);
+      }
+    }
+
+    function displaySuggestions(words) {
+      const box = document.getElementById('suggestions');
+      box.innerHTML = '';
+      words.forEach(word => {
+        const btn = document.createElement('button');
+        btn.className = 'btn';
+        btn.innerText = word;
+        btn.onclick = () => {
+          const input = document.getElementById('inputBox');
+          const parts = input.value.split(' ');
+          parts[parts.length - 1] = word;
+          input.value = parts.join(' ') + ' ';
+          onInputChange();
+        };
+        box.appendChild(btn);
+      });
+    }
+
+    function displayPredictions(words) {
+      const box = document.getElementById('predictions');
+      box.innerHTML = '';
+      words.forEach(word => {
+        const btn = document.createElement('button');
+        btn.className = 'btn';
+        btn.innerText = word;
+        btn.onclick = () => {
+          const input = document.getElementById('inputBox');
+          input.value += word + ' ';
+          onInputChange();
+        };
+        box.appendChild(btn);
+      });
+    }
+  </script>
 </body>
 </html>
